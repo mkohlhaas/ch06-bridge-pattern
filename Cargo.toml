@@ -1,0 +1,14 @@
+[package]
+name = "bridge-pattern"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+
+[[bin]]
+name = "static-bridge"
+path = "src/static_bridge.rs"
+
+[[bin]]
+name = "dynamic-bridge"
+path = "src/dynamic_bridge.rs"
