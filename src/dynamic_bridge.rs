@@ -104,3 +104,52 @@ fn main() {
     // 5. Control the TV using the exact same remote interface
     remote.toggle_power(); // turns tv on 
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn tv_enable_disable() {
+        let mut tv = Tv { on: false };
+        assert!(!tv.is_enabled());
+        tv.enable();
+        assert!(tv.is_enabled());
+        tv.disable();
+        assert!(!tv.is_enabled());
+    }
+
+    #[test]
+    fn radio_enable_disable() {
+        let mut radio = Radio { on: false };
+        assert!(!radio.is_enabled());
+        radio.enable();
+        assert!(radio.is_enabled());
+        radio.disable();
+        assert!(!radio.is_enabled());
+    }
+
+    #[test]
+    fn dynamic_remote_toggle() {
+        let radio = Box::new(Radio { on: false });
+        let mut remote = BasicRemote::new(radio);
+        remote.toggle_power();
+        assert!(remote.device.is_enabled());
+        remote.toggle_power();
+        assert!(!remote.device.is_enabled());
+    }
+
+    #[test]
+    fn dynamic_remote_change_device() {
+        let radio = Box::new(Radio { on: false });
+        let mut remote = BasicRemote::new(radio);
+        remote.toggle_power();
+        assert!(remote.device.is_enabled());
+
+        let tv = Box::new(Tv { on: false });
+        remote.change_device(tv);
+        assert!(!remote.device.is_enabled());
+        remote.toggle_power();
+        assert!(remote.device.is_enabled());
+    }
+}
