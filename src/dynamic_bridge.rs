@@ -8,9 +8,14 @@ pub trait Device {
     fn disable(&mut self);
 }
 
-// Concrete Implementations (structs)
+// ===================================== //
+// 2. Concrete Implementations (structs) //
+// ===================================== //
 
-// Concrete Implementation A
+// ------------------------- //
+// Concrete Implementation A //
+// ------------------------- //
+
 pub struct Tv {
     on: bool,
 }
@@ -26,7 +31,10 @@ impl Device for Tv {
     }
 }
 
-// Concrete Implementation B
+// ------------------------- //
+// Concrete Implementation B //
+// ------------------------- //
+
 pub struct Radio {
     on: bool,
 }
@@ -43,16 +51,16 @@ impl Device for Radio {
 }
 
 // =================================== //
-// 2. THE HIGH-LEVEL ABSTRACTION TRAIT //
+// 3. THE HIGH-LEVEL ABSTRACTION TRAIT //
 // =================================== //
 
 pub trait Remote {
     fn toggle_power(&mut self);
-    fn change_device(&mut self, new_device: Box<dyn Device>);
+    fn change_device(&mut self, new_device: Box<dyn Device>); // now part of the trait
 }
 
 // =============================== //
-// 3. The (Dynamic) Bridge (struct)//
+// 4. The (Dynamic) Bridge (struct)//
 // =============================== //
 
 pub struct BasicRemote {
@@ -67,7 +75,7 @@ impl BasicRemote {
 }
 
 // ========================================================= //
-// 4. Implement High-level Abstraction for the Bridge Struct //
+// 5. Implement High-level Abstraction for the Bridge Struct //
 // ========================================================= //
 
 impl Remote for BasicRemote {
@@ -87,6 +95,10 @@ impl Remote for BasicRemote {
     }
 }
 
+// ======== //
+// 6. Usage //
+// ======== //
+
 fn main() {
     // 1. Create low-level the hardware implementations
     let radio = Box::new(Radio { on: false });
@@ -104,6 +116,10 @@ fn main() {
     // 5. Control the TV using the exact same remote interface
     remote.toggle_power(); // turns tv on 
 }
+
+// ===== //
+// Tests //
+// ===== //
 
 #[cfg(test)]
 mod tests {

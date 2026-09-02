@@ -8,7 +8,14 @@ pub trait Device {
     fn disable(&mut self);
 }
 
-// Concrete Implementation A
+// ===================================== //
+// 2. Concrete Implementations (structs) //
+// ===================================== //
+
+// ------------------------- //
+// Concrete Implementation A //
+// ------------------------- //
+
 pub struct Tv {
     on: bool,
 }
@@ -24,7 +31,10 @@ impl Device for Tv {
     }
 }
 
-// Concrete Implementation B
+// ------------------------- //
+// Concrete Implementation B //
+// ------------------------- //
+
 pub struct Radio {
     on: bool,
 }
@@ -41,7 +51,7 @@ impl Device for Radio {
 }
 
 // =================================== //
-// 2. THE HIGH-LEVEL ABSTRACTION TRAIT //
+// 3. THE HIGH-LEVEL ABSTRACTION TRAIT //
 // =================================== //
 
 pub trait Remote {
@@ -49,10 +59,11 @@ pub trait Remote {
 }
 
 // =============================== //
-// 3. The (Static) Bridge (struct) //
+// 4. The (Static) Bridge (struct) //
 // =============================== //
 
 // The Bridge: Evaluated at compile time via standard Rust generics
+// `Device` is a trait bound.
 pub struct BasicRemote<D: Device> {
     device: D,
 }
@@ -71,7 +82,7 @@ impl<D: Device> BasicRemote<D> {
 }
 
 // ========================================================= //
-// 4. Implement High-level Abstraction for the Bridge Struct //
+// 5. Implement High-level Abstraction for the Bridge Struct //
 // ========================================================= //
 
 impl<D: Device> Remote for BasicRemote<D> {
@@ -86,9 +97,10 @@ impl<D: Device> Remote for BasicRemote<D> {
     }
 }
 
-// =======================================================
-// 3. USAGE
-// =======================================================
+// ======== //
+// 6. USAGE //
+// ======== //
+
 fn main() {
     // 1. Create the hardware implementations (allocated entirely on the stack)
     let radio = Radio { on: false };
@@ -103,6 +115,10 @@ fn main() {
     let mut remote = remote.change_device(tv);
     remote.toggle_power(); // turn tv on
 }
+
+// ===== //
+// Tests //
+// ===== //
 
 #[cfg(test)]
 mod tests {

@@ -1,5 +1,7 @@
 ### The Bridge Design Pattern
 
+Note: Compare both versions side-by-side in neovim.
+
 The bridge pattern allows separating an abstraction from its
 implementation so that both can evolve independently.
 
