@@ -132,3 +132,65 @@ In Rust, you can implement the bridge connection in two distinct flavors based o
 * **Preventing Combinatorial Class Explosion**: Use it when you notice a feature set multiplying across multiple axes (e.g., File Format × Database Provider, or Shape Type × Rendering Pipeline).
 * **Decoupling Compile Dependencies**: It lets you develop and maintain front-facing APIs independently from backend platforms or third-party engines.
 * **Cross-Platform Abstractions**: Common for cross-platform Rust apps where the high-level code interacts with a single interface, while the backend translates it to Windows, macOS, or Linux APIs.
+
+### What is the Difference to the Adapter Pattern?
+
+While both patterns act as structural wrappers that connect different parts of
+a system, they serve entirely different goals and are used at different stages
+of the software lifecycle.
+
+The primary difference lies in intent: The Adapter pattern is a tool used to
+fix compatibility issues in existing code, while the Bridge pattern is an
+architectural choice used up front to prevent code from becoming tangled in the
+first place.
+
+Here is a direct comparison overview:
+
+| Feature | 🌉 Bridge Pattern | 🔌 Adapter Pattern |
+|---|---|---|
+| Primary Intent | Decouple an abstraction from its implementation so the two can vary independently. | Convert the interface of an existing class into another interface that clients expect. |
+| When to use | Designed up front during initial system architecture. | Applied after-the-fact when existing modules or 3rd-party libs don't fit together. |
+| Relationship | Abstractions and implementations are split into completely independent hierarchies. | Two existing, incompatible interfaces are joined together. |
+| Agnosticism | The abstraction layer doesn't care about the low-level details, and the backend doesn't care about the high-level logic. | The adapter forces an existing object (Adaptee) to conform to a specific Target interface. |
+
+### Conceptual Comparison
+
+#### The Adapter Pattern (🔌 "Fixing the Present")
+Imagine you have an existing Rust application that expects a data logging
+component to implement the Logger trait. You decide to use a third-party
+library for cloud logging, but its struct uses a method called
+`ship_telemetry_payload()`.
+
+They don't match, and you can't rewrite the third-party library. You write an
+Adapter struct that implements Logger and internally translates the calls to
+the third-party format.
+
+```
+[ Client ] ──► [ «trait» Logger ]
+                     ▲
+                     │ (implemented by)
+               [ LogAdapter ] ───► [ ThirdPartyCloudLib ] (Adaptee)
+```
+
+#### The Bridge Pattern (🌉 "Planning the Future")
+
+Imagine you are building a cross-platform graphics application from scratch.
+You know you will have multiple shapes (Circle, Square) and multiple rendering
+engines (Vulkan, Metal).
+
+Instead of creating 4 distinct combinations (VulkanCircle, MetalCircle,
+VulkanSquare, MetalSquare), you use a Bridge. You create a high-level Shape
+hierarchy and a low-level RenderEngine hierarchy. They are developed completely
+independently, and they "cross bridges" at runtime.
+
+```
+[ High-Level Shapes ]          [ Low-Level Engines ]
+   ┌──────────┐                   ┌──────────────┐
+   │  Circle  │ ─── ( Bridge ) ──►│ VulkanEngine │
+   ├──────────┤                   ├──────────────┤
+   │  Square  │                   │ MetalEngine  │
+   └──────────┘                   └──────────────┘
+```
+
+If you add a third shape (Triangle), you don't touch the engines. If you add a
+third engine (WebGPU), you don't touch the shapes.
