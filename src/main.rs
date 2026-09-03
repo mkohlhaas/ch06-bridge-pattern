@@ -134,3 +134,35 @@ fn main() {
     circle.resize(2.0);
     circle.draw();
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_circle_resize() {
+        let engine = Box::new(VulkanEngine);
+        let mut circle = Circle::new(5.0, engine);
+        circle.resize(2.0);
+        assert!((circle.radius - 10.0).abs() < f64::EPSILON);
+    }
+
+    #[test]
+    fn test_square_draw_does_not_panic() {
+        let engine = Box::new(MetalEngine);
+        let square = Square::new(10.0, engine);
+        square.draw();
+    }
+
+    #[test]
+    fn test_cross_bridge_mix_and_match() {
+        let vulkan = Box::new(VulkanEngine);
+        let metal = Box::new(MetalEngine);
+        let mut circle = Circle::new(3.0, vulkan);
+        let mut square = Square::new(4.0, metal);
+        circle.resize(1.5);
+        square.resize(0.5);
+        assert!((circle.radius - 4.5).abs() < f64::EPSILON);
+        assert!((square.side - 2.0).abs() < f64::EPSILON);
+    }
+}
