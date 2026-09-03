@@ -194,3 +194,54 @@ independently, and they "cross bridges" at runtime.
 
 If you add a third shape (Triangle), you don't touch the engines. If you add a
 third engine (WebGPU), you don't touch the shapes.
+
+You would have only one bridge structural pattern, but that single bridge
+architecture handles all of your shapes and engines.
+
+```
+      ┌───────────────────────┐
+      │     «trait» Shape     │  HIGH-LEVEL/USER-FACING INTERFACE
+      └───────────▲───────────┘
+                  │
+          ┌───────┴───────┐
+          │               │
+    ┌─────┴────┐     ┌────┴─────┐
+    │  Circle  │     │  Square  │
+    └─────┬────┘     └────┬─────┘
+          │               │
+          └───────┬───────┘
+                  │  
+                  │ Uses (= the Bridge)
+                  ▼
+      ┌───────────────────────┐
+      │ «trait» RenderEngine  │  LOW-LEVEL/BACKEND INTERFACE
+      └───────────▲───────────┘
+                  │
+          ┌───────┴───────┐
+          │               │
+   ┌──────┴───────┐ ┌─────┴───────┐
+   │ VulkanEngine │ │ MetalEngine  │
+   └──────────────┘ └─────────────┘
+      LOW-LEVEL IMPLEMENTATIONS
+```
+
+In Rust code:
+
+```rust
+// The single trait defining what ANY rendering engine must be able to do
+trait RenderEngine {
+    fn render_pixel(&self, x: i32, y: i32);
+}
+
+// Circle only knows about the abstract RenderEngine trait, NOT Vulkan or Metal
+struct Circle {
+    radius: f64,
+    engine: Box<dyn RenderEngine>, // <-- This pointer IS the bridge
+}
+
+// Square uses the exact same bridge strategy
+struct Square {
+    side: f64,
+    engine: Box<dyn RenderEngine>, // <-- The same bridge mechanism
+}
+```
