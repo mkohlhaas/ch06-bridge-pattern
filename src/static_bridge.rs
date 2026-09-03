@@ -62,10 +62,12 @@ pub trait Remote {
 // 4. The (Static) Bridge (struct) //
 // =============================== //
 
+// The Bridge connects low-level to high-level.
+
 // The Bridge: Evaluated at compile time via standard Rust generics
 // `Device` is a trait bound.
 pub struct BasicRemote<D: Device> {
-    device: D,
+    device: D, // low-level!!!
 }
 
 impl<D: Device> BasicRemote<D> {
