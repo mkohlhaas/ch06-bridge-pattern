@@ -2,9 +2,23 @@
 // 1. THE LOW-LEVEL IMPLEMENTATION HIERARCHY  //
 // ========================================== //
 
+// The engine knows how to *draw*, but is deliberately agnostic to any specific
+// shape. It only consumes a ShapeDescriptor — a shape that describes its own
+// geometry to the backend. This keeps the two hierarchies independent: adding
+// a new shape never touches an engine, and adding a new engine never touches
+// a shape.
+
+// A shape hands the backend a description of its geometry.
+// (In a real renderer this might be a mesh, a canvas, shader bindings, etc.)
+// NOTE: What would happen if I added a shape that needed more information than just what's in ShapeDescriptor?
+struct ShapeDescriptor<'a> {
+    kind: &'static str,
+    size: f64,
+    note: &'a str,
+}
+
 trait RenderEngine {
-    fn render_circle(&self, radius: f64);
-    fn render_square(&self, side: f64);
+    fn render(&self, descriptor: &ShapeDescriptor);
 }
 
 // ---------------------- //
@@ -13,17 +27,10 @@ trait RenderEngine {
 
 struct VulkanEngine;
 impl RenderEngine for VulkanEngine {
-    fn render_circle(&self, radius: f64) {
+    fn render(&self, descriptor: &ShapeDescriptor) {
         println!(
-            "Vulkan [GPU Pipeline]: Rasterizing a circle with radius {:.1}.",
-            radius
-        );
-    }
-
-    fn render_square(&self, side: f64) {
-        println!(
-            "Vulkan [GPU Pipeline]: Rasterizing a square with sides {:.1}.",
-            side
+            "Vulkan [GPU Pipeline]: Rasterizing a {} of size {:.1} ({})",
+            descriptor.kind, descriptor.size, descriptor.note
         );
     }
 }
@@ -34,17 +41,10 @@ impl RenderEngine for VulkanEngine {
 
 struct MetalEngine;
 impl RenderEngine for MetalEngine {
-    fn render_circle(&self, radius: f64) {
+    fn render(&self, descriptor: &ShapeDescriptor) {
         println!(
-            "Metal [Apple Silicon]: Drawing vector circle with radius {:.1}.",
-            radius
-        );
-    }
-
-    fn render_square(&self, side: f64) {
-        println!(
-            "Metal [Apple Silicon]: Drawing vector square with sides {:.1}.",
-            side
+            "Metal [Apple Silicon]: Drawing vector {} of size {:.1} ({})",
+            descriptor.kind, descriptor.size, descriptor.note
         );
     }
 }
@@ -55,6 +55,7 @@ impl RenderEngine for MetalEngine {
 
 trait Shape {
     fn draw(&self);
+    fn describe(&self) -> ShapeDescriptor<'_>;
     fn resize(&mut self, factor: f64);
 }
 
@@ -75,9 +76,19 @@ impl Circle {
 }
 
 impl Shape for Circle {
+    fn describe(&self) -> ShapeDescriptor<'_> {
+        ShapeDescriptor {
+            kind: "circle",
+            size: self.radius,
+            note: "by radius",
+        }
+    }
+
     fn draw(&self) {
-        // High-level abstraction delegates work across the bridge
-        self.engine.render_circle(self.radius);
+        // The shape describes itself, then delegates the actual rasterization
+        // to its engine across the bridge.
+        let descriptor = self.describe();
+        self.engine.render(&descriptor);
     }
 
     fn resize(&mut self, factor: f64) {
@@ -102,9 +113,17 @@ impl Square {
 }
 
 impl Shape for Square {
+    fn describe(&self) -> ShapeDescriptor<'_> {
+        ShapeDescriptor {
+            kind: "square",
+            size: self.side,
+            note: "side length",
+        }
+    }
+
     fn draw(&self) {
-        // High-level abstraction delegates work across the bridge
-        self.engine.render_square(self.side);
+        let descriptor = self.describe();
+        self.engine.render(&descriptor);
     }
 
     fn resize(&mut self, factor: f64) {
